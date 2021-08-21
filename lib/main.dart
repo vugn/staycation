@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:staycation/pages/home.dart';
+import 'package:staycation/pages/login.dart';
+import 'package:staycation/pages/onboarding.dart';
 import 'package:staycation/utils/CustomScroll.dart';
 import 'package:http/http.dart' as http;
 
@@ -73,6 +75,14 @@ class StaycationState extends State<Staycation> {
       AndroidNotification? android = message.notification?.android;
       if (notification != null && android != null) {
         final String image = await _base64encodedImage(android.imageUrl ?? '');
+        final BigPictureStyleInformation bigPictureStyleInformation =
+            BigPictureStyleInformation(
+                ByteArrayAndroidBitmap.fromBase64String(image),
+                largeIcon: ByteArrayAndroidBitmap.fromBase64String(image),
+                contentTitle: notification.title,
+                htmlFormatContentTitle: true,
+                summaryText: notification.body,
+                htmlFormatSummaryText: true);
         flutterLocalNotificationsPlugin.show(
             notification.hashCode,
             notification.title,
@@ -81,7 +91,8 @@ class StaycationState extends State<Staycation> {
               android: AndroidNotificationDetails(
                   channel.id, channel.name, channel.description,
                   icon: android.smallIcon,
-                  largeIcon: ByteArrayAndroidBitmap.fromBase64String(image)),
+                  largeIcon: ByteArrayAndroidBitmap.fromBase64String(image),
+                  styleInformation: bigPictureStyleInformation),
             ));
       }
     });
@@ -91,12 +102,21 @@ class StaycationState extends State<Staycation> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Staycation',
+      initialRoute: '/',
+      routes: Navigate.routes,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Poppins',
       ),
       scrollBehavior: MyCustomScrollBehavior(),
-      home: HomePage(),
     );
   }
+}
+
+class Navigate {
+  static Map<String, Widget Function(BuildContext)> routes = {
+    '/': (context) => OnboardingScreen(),
+    '/sign-in': (context) => LoginPage(),
+    '/home': (context) => HomePage()
+  };
 }

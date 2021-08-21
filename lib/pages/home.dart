@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:staycation/data/api_response.dart';
 import 'package:staycation/fonts/stc_icons.dart';
@@ -17,6 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   late HomeApiBloc _bloc;
+  User? user = FirebaseAuth.instance.currentUser;
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
@@ -66,7 +68,7 @@ class _HomePageState extends State<HomePage> {
                     margin: EdgeInsets.only(left: 30, top: 35),
                     width: 257,
                     child: Text(
-                      'Forget Busy Work, Start Next Vacation',
+                      'Forget Busy Work, Start Next Vacation ${user!.displayName}',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w600,
