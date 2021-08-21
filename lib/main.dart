@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:staycation/pages/home.dart';
 import 'package:staycation/utils/CustomScroll.dart';
+import 'package:http/http.dart' as http;
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -48,6 +51,12 @@ class Staycation extends StatefulWidget {
   StaycationState createState() => StaycationState();
 }
 
+Future<String> _base64encodedImage(String url) async {
+  final http.Response response = await http.get(Uri.parse(url));
+  final String base64Data = base64Encode(response.bodyBytes);
+  return base64Data;
+}
+
 class StaycationState extends State<Staycation> {
   @override
   void initState() {
@@ -63,18 +72,16 @@ class StaycationState extends State<Staycation> {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
       if (notification != null && android != null) {
-        //final String image = await _base64encodedImage(android.imageUrl);
+        final String image = await _base64encodedImage(android.imageUrl ?? '');
         flutterLocalNotificationsPlugin.show(
             notification.hashCode,
             notification.title,
             notification.body,
             NotificationDetails(
               android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channel.description,
-                icon: android.smallIcon,
-              ),
+                  channel.id, channel.name, channel.description,
+                  icon: android.smallIcon,
+                  largeIcon: ByteArrayAndroidBitmap.fromBase64String(image)),
             ));
       }
     });

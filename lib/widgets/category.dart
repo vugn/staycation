@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:skeleton_text/skeleton_text.dart';
 import 'package:staycation/fonts/stc_icons.dart';
+import 'package:staycation/globals/config.dart';
 import 'package:staycation/models/landing_page.dart';
 import 'package:staycation/pages/detail.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
-const hostUrl = 'https://staycation-rand.herokuapp.com/';
 
 class CategorySection extends StatelessWidget {
   final homeApi;
@@ -68,7 +67,7 @@ class CategorySection extends StatelessWidget {
                                             child: ClipRRect(
                                               child: CachedNetworkImage(
                                                   imageUrl:
-                                                      '$hostUrl${categoryItems[index].images[0].imageUrl}',
+                                                      '$baseUrl${categoryItems[index].images[0].imageUrl}',
                                                   placeholder: (context, url) =>
                                                       SkeletonAnimation(
                                                         shimmerColor:

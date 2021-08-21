@@ -5,11 +5,9 @@ import 'package:staycation/models/landing_page.dart';
 import 'package:staycation/widgets/category.dart';
 import 'package:staycation/widgets/most_picked.dart';
 import 'package:staycation/widgets/skeleton_loading.dart';
-import 'package:staycation/data/landing_page_bloc.dart';
+import 'package:staycation/data/bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-
-const hostUrl = 'https://staycation-rand.herokuapp.com/';
 
 class HomePage extends StatefulWidget {
   @override

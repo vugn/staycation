@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:skeleton_text/skeleton_text.dart';
+import 'package:staycation/globals/config.dart';
 import 'package:staycation/models/landing_page.dart';
 import 'package:staycation/pages/detail.dart';
-
-const hostUrl = 'https://staycation-rand.herokuapp.com/';
 
 class MostPickedSection extends StatelessWidget {
   final HomeApi homeApi;
@@ -35,7 +34,7 @@ class MostPickedSection extends StatelessWidget {
                         child: ClipRRect(
                             child: CachedNetworkImage(
                                 imageUrl:
-                                    '$hostUrl${mostPickedImage[0].imageUrl}',
+                                    '$baseUrl${mostPickedImage[0].imageUrl}',
                                 placeholder: (context, url) =>
                                     SkeletonAnimation(
                                       shimmerColor: Colors.white54,

@@ -141,6 +141,231 @@ class SkeletonLoading extends StatelessWidget {
   }
 }
 
+class DetailSkeletonLoading extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+        child: Stack(
+      children: [
+        SkeletonAnimation(
+          shimmerColor: Colors.white54,
+          borderRadius: BorderRadius.circular(14),
+          child: Container(
+            width: 9999,
+            height: 296,
+            decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(14)),
+          ),
+        ),
+        Container(
+          width: 9999,
+          margin: EdgeInsets.only(top: 266, bottom: 20),
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                  topRight: Radius.circular(40), topLeft: Radius.circular(40))),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SkeletonAnimation(
+                shimmerColor: Colors.white54,
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  margin: EdgeInsets.only(top: 20, left: 30),
+                  width: MediaQuery.of(context).size.width * 0.45,
+                  height: 22,
+                  decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              SkeletonAnimation(
+                shimmerColor: Colors.white54,
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  margin: EdgeInsets.only(top: 4, left: 30),
+                  width: MediaQuery.of(context).size.width * 0.35,
+                  height: 17,
+                  decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              Container(
+                height: 80,
+                margin: EdgeInsets.only(top: 24, left: 16, right: 16),
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 3,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                        margin: EdgeInsets.only(right: index == 3 ? 0 : 12),
+                        child: SkeletonAnimation(
+                          shimmerColor: Colors.white54,
+                          child: Container(
+                            width: 144,
+                            height: 80,
+                            decoration: BoxDecoration(
+                                color: Colors.grey[300],
+                                borderRadius: BorderRadius.circular(8)),
+                          ),
+                        ),
+                      );
+                    }),
+              ),
+              SkeletonAnimation(
+                shimmerColor: Colors.white54,
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  margin: EdgeInsets.only(top: 42, left: 16),
+                  width: MediaQuery.of(context).size.width * 0.35,
+                  height: 17,
+                  decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: 16, right: 16, top: 8),
+                height: 50,
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 8,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                          margin: EdgeInsets.only(
+                              right: index == (index - 1) ? 0 : 12),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              SkeletonAnimation(
+                                shimmerColor: Colors.white54,
+                                child: Container(
+                                  width: 14,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[300],
+                                  ),
+                                ),
+                              ),
+                              SkeletonAnimation(
+                                shimmerColor: Colors.white54,
+                                borderRadius: BorderRadius.circular(14),
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 8),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.15,
+                                  height: 17,
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(14)),
+                                ),
+                              )
+                            ],
+                          ));
+                    }),
+              ),
+              SkeletonAnimation(
+                shimmerColor: Colors.white54,
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  margin: EdgeInsets.only(top: 42, left: 16),
+                  width: MediaQuery.of(context).size.width * 0.55,
+                  height: 17,
+                  decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              Container(
+                height: 110,
+                margin: EdgeInsets.only(top: 8, left: 16, right: 16),
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 4,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Container(
+                          margin: EdgeInsets.only(
+                              right: index == (index - 1) ? 0 : 12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SkeletonAnimation(
+                                shimmerColor: Colors.white54,
+                                child: Container(
+                                  width: 144,
+                                  height: 80,
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(8)),
+                                ),
+                              ),
+                              SkeletonAnimation(
+                                shimmerColor: Colors.white54,
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 3),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.24,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(14)),
+                                ),
+                              ),
+                              SkeletonAnimation(
+                                shimmerColor: Colors.white54,
+                                borderRadius: BorderRadius.circular(14),
+                                child: Container(
+                                  margin: EdgeInsets.only(top: 2),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.18,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                      color: Colors.grey[300],
+                                      borderRadius: BorderRadius.circular(14)),
+                                ),
+                              ),
+                            ],
+                          ));
+                    }),
+              ),
+              SkeletonAnimation(
+                shimmerColor: Colors.white54,
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  margin: EdgeInsets.only(top: 42, left: 16),
+                  width: MediaQuery.of(context).size.width * 0.35,
+                  height: 17,
+                  decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+              SkeletonAnimation(
+                shimmerColor: Colors.white54,
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  margin: EdgeInsets.only(top: 8, left: 16, right: 16),
+                  width: MediaQuery.of(context).size.width,
+                  height: 120,
+                  decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ));
+  }
+}
+
 class ErrorSkeleton extends StatelessWidget {
   final bloc;
 
@@ -179,6 +404,7 @@ class ErrorSkeleton extends StatelessWidget {
                                 )),
                             child: Icon(
                               Icons.refresh,
+                              color: Colors.grey[500],
                               size: 52,
                             ),
                           ),
@@ -294,6 +520,7 @@ class ErrorSkeleton extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(14)),
                                   child: Icon(
                                     Icons.refresh,
+                                    color: Colors.grey[500],
                                     size: 52,
                                   ),
                                 ),
