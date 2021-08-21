@@ -4,6 +4,7 @@ import 'package:staycation/data/api_response.dart';
 import 'package:staycation/fonts/stc_icons.dart';
 import 'package:staycation/models/landing_page.dart';
 import 'package:staycation/widgets/category.dart';
+import 'package:staycation/widgets/drawer.dart';
 import 'package:staycation/widgets/most_picked.dart';
 import 'package:staycation/widgets/skeleton_loading.dart';
 import 'package:staycation/data/bloc.dart';
@@ -18,7 +19,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
   late HomeApiBloc _bloc;
-  User? user = FirebaseAuth.instance.currentUser;
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
@@ -45,7 +45,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         key: _key,
-        drawer: Drawer(),
+        drawer: Drawer(child: MainDrawer()),
         body: SmartRefresher(
             controller: _refreshController,
             onLoading: _onLoading,
@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> {
                     margin: EdgeInsets.only(left: 30, top: 35),
                     width: 257,
                     child: Text(
-                      'Forget Busy Work, Start Next Vacation ${user!.displayName}',
+                      'Forget Busy Work, Start Next Vacation',
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w600,

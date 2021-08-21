@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:staycation/data/login_handler.dart';
 
 class LoginPage extends StatefulWidget {
   _StateLoginPage createState() => _StateLoginPage();
@@ -40,6 +40,12 @@ class _StateLoginPage extends State<LoginPage> {
                   children: [
                     Container(
                       width: 250,
+                      decoration: BoxDecoration(boxShadow: [
+                        BoxShadow(
+                            offset: Offset(0, 2),
+                            blurRadius: 15,
+                            color: Color(0xFF616161).withOpacity(.05))
+                      ]),
                       child: TextButton(
                           onPressed: () async {
                             setState(() {
@@ -122,32 +128,5 @@ class _StateLoginPage extends State<LoginPage> {
             ],
           );
         });
-  }
-}
-
-class FirebaseService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
-
-  Future<String?> signInwithGoogle() async {
-    try {
-      final GoogleSignInAccount? googleSignInAccount =
-          await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleSignInAuthentication =
-          await googleSignInAccount!.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleSignInAuthentication.accessToken,
-        idToken: googleSignInAuthentication.idToken,
-      );
-      await _auth.signInWithCredential(credential);
-    } on FirebaseAuthException catch (e) {
-      print(e.message);
-      throw e;
-    }
-  }
-
-  Future<void> signOutFromGoogle() async {
-    await _googleSignIn.signOut();
-    await _auth.signOut();
   }
 }

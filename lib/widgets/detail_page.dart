@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:skeleton_text/skeleton_text.dart';
-import 'package:staycation/data/api_response.dart';
 import 'package:staycation/fonts/stc_icons.dart';
 import 'package:staycation/globals/config.dart';
 import 'package:staycation/models/detail_page.dart';
