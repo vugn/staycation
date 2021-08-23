@@ -6,6 +6,7 @@ import 'package:staycation/fonts/stc_icons.dart';
 import 'package:staycation/globals/config.dart';
 import 'package:staycation/models/detail_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:staycation/pages/checkout.dart';
 
 class DetailPageWrapper extends StatelessWidget {
   final DetailApi detailApi;
@@ -255,6 +256,7 @@ class DetailPageWrapper extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
                           margin: EdgeInsets.only(),
@@ -266,20 +268,41 @@ class DetailPageWrapper extends StatelessWidget {
                                 fontWeight: FontWeight.w600),
                           ),
                         ),
-                        Container(
-                          margin: EdgeInsets.only(),
-                          child: Text(
-                            "\$${detailApi.price}",
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: Color(0xFF3252DF),
-                                fontWeight: FontWeight.w700),
-                          ),
-                        ),
+                        Row(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(),
+                              child: Text(
+                                "\$${detailApi.price}",
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    color: Color(0xFF3252DF),
+                                    fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                            Container(
+                              margin: EdgeInsets.only(),
+                              child: Text(
+                                "\/Night",
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFFAFAFAF),
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
                     TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    CheckoutPage(detailApi: detailApi)),
+                          );
+                        },
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(
                                 Color(0xFF3252DF)),

@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -6,16 +6,14 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _StateOnboardingScreen extends State<OnboardingScreen> {
-  User? result = FirebaseAuth.instance.currentUser;
+ 
 
   PageController _controller = PageController(initialPage: 0);
 
   @override
   void initState() {
     super.initState();
-    if (result != null) {
-      Navigator.pushReplacementNamed(context, '/home');
-    }
+   
   }
 
   @override
