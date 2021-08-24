@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -6,15 +5,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _StateOnboardingScreen extends State<OnboardingScreen> {
- 
-
   PageController _controller = PageController(initialPage: 0);
-
-  @override
-  void initState() {
-    super.initState();
-   
-  }
 
   @override
   Widget build(BuildContext context) {

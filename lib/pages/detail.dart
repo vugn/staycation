@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:staycation/data/api_response.dart';
-import 'package:staycation/data/bloc.dart';
-import 'package:staycation/models/detail_page.dart';
+import 'package:staycation/data/blocs/bloc.dart';
 import 'package:staycation/widgets/detail_page.dart';
 import 'package:staycation/widgets/skeleton_loading.dart';
 
@@ -16,7 +15,7 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  late DetailApiBloc _bloc;
+  final DetailApiBloc _bloc = DetailApiBloc();
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
@@ -25,17 +24,16 @@ class _DetailPageState extends State<DetailPage> {
   void initState() {
     super.initState();
 
-    _bloc = DetailApiBloc(widget.id);
+    _bloc.add(GetDetailApiList(id: widget.id));
   }
 
-  void _onLoading() async {
-    // monitor network fetch
-    await _bloc.fetchDetailPage(widget.id);
+  void _onLoading() {
+    _bloc.add(GetDetailApiList(id: widget.id));
     _refreshController.loadComplete();
   }
 
-  void _onRefresh() async {
-    await _bloc.fetchDetailPage(widget.id);
+  void _onRefresh() {
+    _bloc.add(GetDetailApiList(id: widget.id));
     _refreshController.refreshCompleted();
   }
 
@@ -48,29 +46,33 @@ class _DetailPageState extends State<DetailPage> {
           onRefresh: _onRefresh,
           child: SingleChildScrollView(
               child: SafeArea(
-            child: StreamBuilder<ApiResponse<DetailApi>>(
-              stream: _bloc.detailPageStream,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  switch (snapshot.data!.status) {
-                    case Status.LOADING:
-                      return Center(
-                        child: DetailSkeletonLoading(),
-                      );
-                    case Status.COMPLETED:
-                      return DetailPageWrapper(
-                        bloc: _bloc,
-                        detailApi: snapshot.data!.data,
-                      );
-                    case Status.ERROR:
-                      Fluttertoast.showToast(msg: snapshot.data!.message);
-                      return ErrorSkeleton(
-                        bloc: _bloc,
-                      );
+            child: BlocProvider(
+              create: (_) => _bloc,
+              child: BlocListener<DetailApiBloc, ApiState>(
+                listener: (context, state) {
+                  if (state is ApiError) {
+                    Fluttertoast.showToast(msg: state.message);
                   }
-                }
-                return Container();
-              },
+                },
+                child: BlocBuilder<DetailApiBloc, ApiState>(
+                    builder: (context, state) {
+                  if (state is ApiLoading) {
+                    return Column(
+                      children: [
+                        DetailSkeletonLoading(),
+                      ],
+                    );
+                  } else if (state is DetailApiLoaded) {
+                    return detailPageWrapper(context, state.detailApi);
+                  } else if (state is ApiError) {
+                    return detailSkeletonLoading(
+                      context,
+                      _bloc,
+                    );
+                  }
+                  return Container();
+                }),
+              ),
             ),
           ))),
     );

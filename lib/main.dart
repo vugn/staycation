@@ -7,9 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:staycation/pages/home.dart';
-import 'package:staycation/pages/login.dart';
-import 'package:staycation/pages/onboarding.dart';
 import 'package:staycation/utils/CustomScroll.dart';
 import 'package:http/http.dart' as http;
 import 'package:staycation/utils/url.dart';
@@ -53,6 +50,7 @@ class Staycation extends StatefulWidget {
 
 Future<String> _base64encodedImage(String url) async {
   String base64Data = '';
+
   try {
     final http.Response response = await http.get(Uri.parse(url));
     base64Data = base64Encode(response.bodyBytes);

@@ -1,13 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:staycation/data/api_response.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:staycation/fonts/stc_icons.dart';
-import 'package:staycation/models/landing_page.dart';
 import 'package:staycation/widgets/category.dart';
 import 'package:staycation/widgets/drawer.dart';
 import 'package:staycation/widgets/most_picked.dart';
 import 'package:staycation/widgets/skeleton_loading.dart';
-import 'package:staycation/data/bloc.dart';
+import 'package:staycation/data/blocs/bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -18,26 +16,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _key = GlobalKey();
-  late HomeApiBloc _bloc;
+  final HomeApiBloc _bloc = HomeApiBloc();
 
   RefreshController _refreshController =
       RefreshController(initialRefresh: false);
 
   @override
   void initState() {
+    _bloc.add(GetApiList());
     super.initState();
-
-    _bloc = HomeApiBloc();
   }
 
-  void _onLoading() async {
-    // monitor network fetch
-    await _bloc.fetchLandingPage();
+  void _onLoading() {
+    _bloc.add(GetApiList());
     _refreshController.loadComplete();
   }
 
-  void _onRefresh() async {
-    await _bloc.fetchLandingPage();
+  void _onRefresh() {
+    _bloc.add(GetApiList());
     _refreshController.refreshCompleted();
   }
 
@@ -126,39 +122,37 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                  StreamBuilder<ApiResponse<HomeApi>>(
-                    stream: _bloc.landingPageStream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        switch (snapshot.data!.status) {
-                          case Status.LOADING:
-                            return Column(
-                              children: [
-                                SkeletonLoading(),
-                              ],
-                            );
-                          case Status.COMPLETED:
-                            return Column(
-                              children: [
-                                MostPickedSection(
-                                  homeApi: snapshot.data!.data,
-                                  bloc: _bloc,
-                                ),
-                                CategorySection(
-                                  homeApi: snapshot.data!.data,
-                                  bloc: _bloc,
-                                ),
-                              ],
-                            );
-                          case Status.ERROR:
-                            Fluttertoast.showToast(msg: snapshot.data!.message);
-                            return ErrorSkeleton(
-                              bloc: _bloc,
-                            );
+                  BlocProvider(
+                    create: (_) => _bloc,
+                    child: BlocListener<HomeApiBloc, ApiState>(
+                      listener: (context, state) {
+                        if (state is ApiError) {
+                          Fluttertoast.showToast(msg: state.message);
                         }
-                      }
-                      return Container();
-                    },
+                      },
+                      child: BlocBuilder<HomeApiBloc, ApiState>(
+                          builder: (context, state) {
+                        if (state is ApiLoading) {
+                          return Column(
+                            children: [
+                              SkeletonLoading(),
+                            ],
+                          );
+                        } else if (state is HomeApiLoaded) {
+                          return Column(
+                            children: [
+                              mostPickedSection(context, state.homeApi),
+                              categorySection(context, state.homeApi),
+                            ],
+                          );
+                        } else if (state is ApiError) {
+                          return ErrorSkeleton(
+                            bloc: _bloc,
+                          );
+                        }
+                        return Container();
+                      }),
+                    ),
                   ),
                 ],
               ),
