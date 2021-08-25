@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:skeleton_text/skeleton_text.dart';
-import 'package:staycation/data/blocs/bloc.dart';
+import 'package:staycation/data/blocs/api_bloc/bloc.dart';
 
 class SkeletonLoading extends StatelessWidget {
   @override

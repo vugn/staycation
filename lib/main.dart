@@ -97,7 +97,6 @@ class StaycationState extends State<Staycation> {
                   channel.description,
                   icon: android.smallIcon,
                   largeIcon: ByteArrayAndroidBitmap.fromBase64String(image),
-                  styleInformation: bigPictureStyleInformation,
                 )))
             : flutterLocalNotificationsPlugin.show(
                 notification.hashCode,

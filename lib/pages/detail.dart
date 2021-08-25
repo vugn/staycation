@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:staycation/data/blocs/bloc.dart';
+import 'package:staycation/data/blocs/api_bloc/bloc.dart';
 import 'package:staycation/widgets/detail_page.dart';
 import 'package:staycation/widgets/skeleton_loading.dart';
 

@@ -1,11 +1,20 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:skeleton_text/skeleton_text.dart';
+import 'package:staycation/data/api_base_helper.dart';
+import 'package:staycation/data/repository.dart';
 import 'package:staycation/globals/config.dart';
 import 'package:staycation/models/detail_page.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:expandable_page_view/expandable_page_view.dart';
+import 'package:mime/mime.dart';
 
 class CheckoutPage extends StatefulWidget {
   late final DetailApi detailApi;
@@ -17,6 +26,9 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   late final DetailApi detailApi = widget.detailApi;
+  late int subTotal;
+  int tax = 10;
+  late num grandTotal;
 
   bool showDatePicker = false;
   int _dateCount = 4;
@@ -26,6 +38,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
           .format(DateTime.now().add(Duration(days: _dateCount - 1)))
           .toString();
 
+  late String _startDate =
+      DateFormat('dd-MM-yyy').format(DateTime.now()).toString();
+  late String _endDate = DateFormat('dd-MM-yyyy')
+      .format(DateTime.now().add(Duration(days: _dateCount - 1)))
+      .toString();
+
   void _onSelectionChanged(DateRangePickerSelectionChangedArgs args) {
     setState(() {
       _range = DateFormat('dd MMM').format(args.value.startDate).toString() +
@@ -33,6 +51,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
           DateFormat('dd MMM')
               .format(args.value.endDate ?? args.value.startDate)
               .toString();
+      _startDate =
+          DateFormat('dd-MM-yyy').format(args.value.startDate).toString();
+      _endDate = DateFormat('dd-MM-yyy')
+          .format(args.value.endDate ?? args.value.startDate)
+          .toString();
 
       _dateCount = int.parse(DateFormat('dd')
               .format(args.value.endDate ?? args.value.startDate)) -
@@ -50,11 +73,17 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _bankFromController = TextEditingController();
+  final TextEditingController _senderNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final GlobalKey<FormFieldState> _firstNameFormKey =
       GlobalKey<FormFieldState>();
   final GlobalKey<FormFieldState> _lastNameFormKey =
+      GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _bankFromFormKey =
+      GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _senderNameFormKey =
       GlobalKey<FormFieldState>();
   final GlobalKey<FormFieldState> _emailFormKey = GlobalKey<FormFieldState>();
   final GlobalKey<FormFieldState> _phoneNumberFormKey =
@@ -68,8 +97,33 @@ class _CheckoutPageState extends State<CheckoutPage> {
         _phoneNumberFormKey.currentState!.isValid));
   }
 
+  bool _isSecondFormValid() {
+    return ((_bankFromFormKey.currentState!.isValid &&
+        _senderNameFormKey.currentState!.isValid));
+  }
+
   PageController _controller = PageController();
   int pageIndex = 1;
+
+  late File _image = File('');
+  final ImagePicker _picker = ImagePicker();
+  final dio = Dio();
+
+  void _imgFromGallery() async {
+    final image =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 1);
+
+    setState(() {
+      _image = File(image!.path);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    subTotal = detailApi.price * _dateCount;
+    grandTotal = subTotal / tax + subTotal;
+  }
 
   @override
   void dispose() {
@@ -77,6 +131,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
     _lastNameController.dispose();
     _emailController.dispose();
     _phoneNumberController.dispose();
+    _bankFromController.dispose();
+    _senderNameController.dispose();
     super.dispose();
   }
 
@@ -97,6 +153,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(
                 height: 22,
@@ -654,7 +711,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               width: 160,
                               child: TextButton(
                                   onPressed: () {
-                                    Navigator.pop(context);
+                                    setState(() {
+                                      pageIndex = 2;
+                                    });
+                                    _controller.jumpToPage(2);
                                   },
                                   style: ButtonStyle(
                                       backgroundColor: MaterialStateProperty.all<Color>(
@@ -680,26 +740,275 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       ],
                     ),
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text('Booking Information',
+                        Text('Payment',
                             style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
                                 color: Color(0xFF152C5B)),
                             textAlign: TextAlign.center),
                         SizedBox(height: 3),
-                        Text('Please fill up the blank fields below',
+                        Text('Kindly follow the instructions below',
                             style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w300,
                                 color: Color(0xFFB0B0B0)),
                             textAlign: TextAlign.center),
-                        SizedBox(height: 20),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
+                        Container(
+                          margin: EdgeInsets.only(top: 32),
+                          width: 314,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Transfer Pembayaran:',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF152C5B))),
+                                  SizedBox(
+                                    height: 14,
+                                  ),
+                                  Text('Tax $tax%',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF152C5B))),
+                                  SizedBox(
+                                    height: 7,
+                                  ),
+                                  Text('Sub total: \$$subTotal USD',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF152C5B))),
+                                  SizedBox(
+                                    height: 14,
+                                  ),
+                                  Text('Total: \$$grandTotal USD',
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w400,
+                                          color: Color(0xFF152C5B))),
+                                ],
+                              ),
+                              Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      CachedNetworkImage(
+                                        imageUrl:
+                                            '$baseUrl${detailApi.banks[0].imageUrl}',
+                                        width: 64,
+                                        height: 20,
+                                      ),
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(detailApi.banks[0].bankName,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF152C5B))),
+                                          SizedBox(
+                                            height: 2,
+                                          ),
+                                          Text(detailApi.banks[0].bankNumber,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF152C5B))),
+                                          SizedBox(
+                                            height: 2,
+                                          ),
+                                          Text(detailApi.banks[0].name,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF152C5B))),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      CachedNetworkImage(
+                                        imageUrl:
+                                            '$baseUrl${detailApi.banks[1].imageUrl}',
+                                        width: 74,
+                                        height: 34,
+                                      ),
+                                      SizedBox(
+                                        width: 8,
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(detailApi.banks[1].bankName,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF152C5B))),
+                                          SizedBox(
+                                            height: 2,
+                                          ),
+                                          Text(detailApi.banks[1].bankNumber,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF152C5B))),
+                                          SizedBox(
+                                            height: 2,
+                                          ),
+                                          Text(detailApi.banks[1].name,
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Color(0xFF152C5B))),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: 44,
+                        ),
+                        Divider(
+                          color: Colors.grey[500],
+                        ),
+                        Container(
+                          width: 231,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Upload Bukti Transfer",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF152C5B))),
+                                SizedBox(
+                                  height: 6,
+                                ),
+                                InkWell(
+                                  child: Container(
+                                      height: 50,
+                                      width: 9999,
+                                      decoration: BoxDecoration(
+                                        color: Color(0xFFF5F6F8),
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                      child: Text(_image.path.split('/').last)),
+                                  onTap: _imgFromGallery,
+                                ),
+                                Text("Asal Bank",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF152C5B))),
+                                SizedBox(
+                                  height: 6,
+                                ),
+                                TextFormField(
+                                  controller: _bankFromController,
+                                  key: _bankFromFormKey,
+                                  decoration: InputDecoration(
+                                    hintText: 'Please type here ...',
+                                    hintStyle: TextStyle(
+                                        fontSize: 15.0,
+                                        color: Color(0xFFAFAFAF),
+                                        fontWeight: FontWeight.w400),
+                                    contentPadding: EdgeInsets.all(20),
+                                    filled: true,
+                                    fillColor: Color(0xFFF5F6F8),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.transparent),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(3))),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.transparent),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(3))),
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isSecondSubmitButtonEnabled =
+                                          _isSecondFormValid();
+                                      _bankFromFormKey.currentState!.validate();
+                                    });
+                                  },
+                                  validator: (String? value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter some text';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                SizedBox(
+                                  height: 14,
+                                ),
+                                Text("Nama Pengirim",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w400,
+                                        color: Color(0xFF152C5B))),
+                                SizedBox(
+                                  height: 6,
+                                ),
+                                TextFormField(
+                                  controller: _senderNameController,
+                                  key: _senderNameFormKey,
+                                  decoration: InputDecoration(
+                                    hintText: 'Please type here ...',
+                                    hintStyle: TextStyle(
+                                        fontSize: 15.0,
+                                        color: Color(0xFFAFAFAF),
+                                        fontWeight: FontWeight.w400),
+                                    contentPadding: EdgeInsets.all(20),
+                                    filled: true,
+                                    fillColor: Color(0xFFF5F6F8),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.transparent),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(3))),
+                                    enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            color: Colors.transparent),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(3))),
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isSecondSubmitButtonEnabled =
+                                          _isSecondFormValid();
+                                      _senderNameFormKey.currentState!
+                                          .validate();
+                                    });
+                                  },
+                                  validator: (String? value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter some text';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ]),
+                        ),
                         SizedBox(
                           height: 42,
                         ),
@@ -708,9 +1017,86 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 child: SizedBox(
                                   width: 160,
                                   child: TextButton(
-                                      onPressed: () {
-                                        pageIndex = 1;
-                                        _controller.jumpToPage(1);
+                                      onPressed: () async {
+                                        ApiBaseHelper()
+                                            .postMultipart(
+                                                'api/v1/member/booking-page',
+                                                {
+                                                  'idItem': detailApi.id,
+                                                  'duration':
+                                                      _dateCount.toString(),
+                                                  'bookingStartDate':
+                                                      _startDate,
+                                                  'bookingEndDate': _endDate,
+                                                  'firstName':
+                                                      _firstNameController.text,
+                                                  'lastName':
+                                                      _lastNameController.text,
+                                                  'email':
+                                                      _emailController.text,
+                                                  'accountHolder':
+                                                      _senderNameController
+                                                          .text,
+                                                  'phoneNumber':
+                                                      _phoneNumberController
+                                                          .text
+                                                          .toString(),
+                                                  'bankFrom':
+                                                      _bankFromController.text,
+                                                },
+                                                _image,
+                                                "image")
+                                            .then((value) => {
+                                                  if (value['result'])
+                                                    {print('work')}
+                                                  else
+                                                    {
+                                                      print(
+                                                          'error ${value['data']}')
+                                                    }
+                                                });
+
+                                        // try {
+                                        //   dio.options.contentType =
+                                        //       'multipart/form-data';
+                                        //   final file =
+                                        //       await MultipartFile.fromFile(
+                                        //           _image.path,
+                                        //           contentType: new MediaType(
+                                        //               "image",
+                                        //               _image.path
+                                        //                   .split(".")
+                                        //                   .last));
+
+                                        //   final formData = FormData.fromMap({
+                                        //     'imageUrl': file,
+                                        //     'idItem': detailApi.id,
+                                        //     'duration': _dateCount.toString(),
+                                        //     'bookingStartDate': _startDate,
+                                        //     'bookingEndDate': _endDate,
+                                        //     'firstName':
+                                        //         _firstNameController.text,
+                                        //     'lastName':
+                                        //         _lastNameController.text,
+                                        //     'email': _emailController.text,
+                                        //     'accountHolder':
+                                        //         _senderNameController.text,
+                                        //     'phoneNumber':
+                                        //         _phoneNumberController.text
+                                        //             .toString(),
+                                        //     'bankFrom':
+                                        //         _bankFromController.text,
+                                        //   });
+
+                                        //   var response = await dio.post(
+                                        //     baseUrl +
+                                        //         'api/v1/member/booking-page',
+                                        //     data: formData,
+                                        //   );
+                                        //   print(response);
+                                        // } catch (e) {
+                                        //   print(e);
+                                        // }
                                       },
                                       style: ButtonStyle(
                                           backgroundColor:

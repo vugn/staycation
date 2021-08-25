@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:path/path.dart';
 import 'dart:convert';
 import 'package:staycation/data/app_exceptions.dart';
 import 'dart:async';
+
+import 'package:staycation/globals/config.dart';
 
 class ApiBaseHelper {
   final String _baseUrl =
@@ -63,6 +66,39 @@ class ApiBaseHelper {
     }
     print('api delete.');
     return apiResponse;
+  }
+
+  Future<Map<String, dynamic>> postMultipart(
+      String url, Map<String, String> data, File file, String field) async {
+    print('Api MultiPart Post, url $url');
+
+    http.StreamedResponse response;
+    Uri uri = Uri.parse("$baseUrl$url");
+    try {
+      http.MultipartRequest request = http.MultipartRequest('POST', uri);
+
+      Map<String, String> headers = {"Content-Type": "multipart/form-data"};
+
+      request.headers.addAll(headers);
+      request.fields.addAll(data);
+
+      http.ByteStream stream1 = http.ByteStream(file.openRead());
+      int length1 = await file.length();
+      http.MultipartFile vFile1 = http.MultipartFile(field, stream1, length1,
+          filename: basename(file.path));
+      request.files.add(vFile1);
+
+      response = await request.send();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return {"result": true};
+      } else {
+        return {"result": false, "data": "code ${response.statusCode}"};
+      }
+    } on SocketException {
+      return {"result": false, "data": "Cannot Reach Server"};
+    } on FormatException catch (e) {
+      return {"result": false, "data": "Format error ${e.message}"};
+    }
   }
 }
 
