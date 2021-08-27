@@ -7,9 +7,8 @@ class FirstName extends FormzInput<String, FirstNameValidationError> {
   const FirstName.dirty([String value = '']) : super.dirty(value);
 
   FirstNameValidationError? validator(String? value) {
-    if (value == null || value.isEmpty) {
-      return null;
-    }
-    return FirstNameValidationError.invalid;
+    return value == null || value == ""
+        ? FirstNameValidationError.invalid
+        : null;
   }
 }

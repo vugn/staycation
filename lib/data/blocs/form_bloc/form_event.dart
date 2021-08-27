@@ -2,7 +2,6 @@ part of 'form_bloc.dart';
 
 abstract class FormEvent extends Equatable {
   const FormEvent();
-
   @override
   List<Object> get props => [];
 }
@@ -43,4 +42,45 @@ class LastNameChanged extends FormEvent {
   List<Object> get props => [lastName];
 }
 
-class FormSubmitted extends FormEvent {}
+class BankNameChanged extends FormEvent {
+  const BankNameChanged({required this.bankName});
+
+  final String bankName;
+
+  @override
+  List<Object> get props => [bankName];
+}
+
+class SenderNameChanged extends FormEvent {
+  const SenderNameChanged({required this.senderName});
+
+  final String senderName;
+
+  @override
+  List<Object> get props => [senderName];
+}
+
+class FormSubmitted extends FormEvent {
+  const FormSubmitted({
+    required this.idItem,
+    required this.startDate,
+    required this.endDate,
+    required this.duration,
+    required this.image,
+  });
+
+  final String idItem;
+  final String startDate;
+  final String endDate;
+  final String duration;
+  final File image;
+
+  @override
+  List<Object> get props => [
+        idItem,
+        startDate,
+        endDate,
+        duration,
+        image,
+      ];
+}

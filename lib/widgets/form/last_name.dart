@@ -7,9 +7,8 @@ class LastName extends FormzInput<String, LastNameValidationError> {
   const LastName.dirty([String value = '']) : super.dirty(value);
 
   LastNameValidationError? validator(String? value) {
-    if (value == null || value.isEmpty) {
-      return null;
-    }
-    return LastNameValidationError.invalid;
+    return value == null || value == ""
+        ? LastNameValidationError.invalid
+        : null;
   }
 }

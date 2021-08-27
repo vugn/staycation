@@ -6,6 +6,8 @@ class CheckoutFormState extends Equatable {
     this.phoneNumber = const PhoneNumber.pure(),
     this.firstName = const FirstName.pure(),
     this.lastName = const LastName.pure(),
+    this.senderName = const SenderName.pure(),
+    this.bankName = const BankName.pure(),
     this.status = FormzStatus.pure,
   });
 
@@ -13,6 +15,8 @@ class CheckoutFormState extends Equatable {
   final PhoneNumber phoneNumber;
   final FirstName firstName;
   final LastName lastName;
+  final SenderName senderName;
+  final BankName bankName;
   final FormzStatus status;
 
   CheckoutFormState copyWith({
@@ -20,6 +24,8 @@ class CheckoutFormState extends Equatable {
     PhoneNumber? phoneNumber,
     FirstName? firstName,
     LastName? lastName,
+    SenderName? senderName,
+    BankName? bankName,
     FormzStatus? status,
   }) {
     return CheckoutFormState(
@@ -27,10 +33,13 @@ class CheckoutFormState extends Equatable {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
+      senderName: senderName ?? this.senderName,
+      bankName: bankName ?? this.bankName,
       status: status ?? this.status,
     );
   }
 
   @override
-  List<Object> get props => [email, phoneNumber, firstName, lastName, status];
+  List<Object> get props =>
+      [email, phoneNumber, firstName, lastName, senderName, bankName, status];
 }

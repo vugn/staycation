@@ -7,9 +7,8 @@ class SenderName extends FormzInput<String, SenderNameValidationError> {
   const SenderName.dirty([String value = '']) : super.dirty(value);
 
   SenderNameValidationError? validator(String? value) {
-    if (value == null || value.isEmpty) {
-      return null;
-    }
-    return SenderNameValidationError.invalid;
+    return value == null || value == ""
+        ? SenderNameValidationError.invalid
+        : null;
   }
 }

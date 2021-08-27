@@ -1,5 +1,7 @@
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart';
 import 'dart:convert';
 import 'package:staycation/data/app_exceptions.dart';
@@ -70,29 +72,31 @@ class ApiBaseHelper {
 
   Future<Map<String, dynamic>> postMultipart(
       String url, Map<String, String> data, File file, String field) async {
-    print('Api MultiPart Post, url $url');
+    Uri uri = Uri.parse("$baseUrl$url");
+    print(uri);
 
     http.StreamedResponse response;
-    Uri uri = Uri.parse("$baseUrl$url");
+
     try {
       http.MultipartRequest request = http.MultipartRequest('POST', uri);
-
-      Map<String, String> headers = {"Content-Type": "multipart/form-data"};
-
-      request.headers.addAll(headers);
       request.fields.addAll(data);
 
-      http.ByteStream stream1 = http.ByteStream(file.openRead());
-      int length1 = await file.length();
-      http.MultipartFile vFile1 = http.MultipartFile(field, stream1, length1,
-          filename: basename(file.path));
+      http.MultipartFile vFile1 = http.MultipartFile.fromBytes(
+          field, file.readAsBytesSync(),
+          filename: basename(file.path),
+          contentType: MediaType('application', extension(file.path)));
       request.files.add(vFile1);
 
       response = await request.send();
+      final responseBody = await response.stream.bytesToString();
       if (response.statusCode == 200 || response.statusCode == 201) {
         return {"result": true};
       } else {
-        return {"result": false, "data": "code ${response.statusCode}"};
+        return {
+          "result": false,
+          "data": "code ${response.statusCode}",
+          "body": "$responseBody"
+        };
       }
     } on SocketException {
       return {"result": false, "data": "Cannot Reach Server"};
