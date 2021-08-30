@@ -17,7 +17,7 @@ class _StateLoginPage extends State<LoginPage> {
           SizedBox(
             height: 124,
           ),
-          Image.asset('assets/images/logo.png', width: 251, height: 251),
+          Image.asset('assets/images/logo.png', width: 232, height: 247),
           Container(
             margin: EdgeInsets.only(top: 18, bottom: 48, left: 26, right: 26),
             child: Column(
