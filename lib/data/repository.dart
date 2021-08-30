@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:staycation/data/api_base_helper.dart';
 import 'package:staycation/models/detail_page.dart';
 import 'package:staycation/models/landing_page.dart';

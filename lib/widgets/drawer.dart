@@ -4,8 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:skeleton_text/skeleton_text.dart';
 import 'package:staycation/data/login_handler.dart';
 
+// ignore: must_be_immutable
 class MainDrawer extends StatelessWidget {
-  final User? user = FirebaseAuth.instance.currentUser;
+  late ValueChanged<int> currentIndex;
+  final index;
+  MainDrawer({Key? key, required this.currentIndex, this.index})
+      : super(key: key);
+
+  User? user = FirebaseAuth.instance.currentUser;
   FirebaseService service = new FirebaseService();
   @override
   Widget build(BuildContext context) {
@@ -68,13 +74,12 @@ class MainDrawer extends StatelessWidget {
               SizedBox(
                 height: 5.0,
               ),
-              Text(
-                user!.displayName ?? "Aninymous",
-                style: TextStyle(
-                  fontSize: 22.0,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
+              Text(user!.displayName ?? "User",
+                  style: TextStyle(
+                    fontSize: 22.0,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  textAlign: TextAlign.center),
               SizedBox(
                 height: 5.0,
               ),
@@ -93,28 +98,24 @@ class MainDrawer extends StatelessWidget {
         height: 20.0,
       ),
       ListTile(
-        onTap: () {},
+        onTap: () {
+          currentIndex(2);
+        },
         leading: Icon(
           Icons.person,
           color: Colors.black,
         ),
-        title: Text("Your Profile"),
+        title: Text("Profile"),
       ),
       ListTile(
-        onTap: () {},
+        onTap: () {
+          currentIndex(1);
+        },
         leading: Icon(
           Icons.inbox,
           color: Colors.black,
         ),
-        title: Text("Your Inbox"),
-      ),
-      ListTile(
-        onTap: () {},
-        leading: Icon(
-          Icons.assessment,
-          color: Colors.black,
-        ),
-        title: Text("Your Dashboard"),
+        title: Text("Inbox"),
       ),
       ListTile(
         onTap: () {},

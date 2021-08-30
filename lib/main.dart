@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,9 +8,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:staycation/pages/home.dart';
+import 'package:staycation/pages/onboarding.dart';
 import 'package:staycation/utils/CustomScroll.dart';
 import 'package:http/http.dart' as http;
-import 'package:staycation/utils/url.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -41,8 +43,6 @@ void main() async {
   runApp(Staycation());
 }
 
-User? result = FirebaseAuth.instance.currentUser;
-
 class Staycation extends StatefulWidget {
   @override
   StaycationState createState() => StaycationState();
@@ -61,9 +61,18 @@ Future<String> _base64encodedImage(String url) async {
 }
 
 class StaycationState extends State<Staycation> {
+  late StreamSubscription<User?> _sub;
+  final _navigatorKey = new GlobalKey<NavigatorState>();
+
   @override
   void initState() {
     super.initState();
+
+    _sub = FirebaseAuth.instance.userChanges().listen((event) {
+      _navigatorKey.currentState!.pushReplacementNamed(
+        event != null ? 'home' : 'login',
+      );
+    });
 
     var initialzationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -77,14 +86,14 @@ class StaycationState extends State<Staycation> {
       AndroidNotification? android = message.notification!.android;
       if (notification != null && android != null) {
         final String image = await _base64encodedImage(android.imageUrl ?? '');
-        final BigPictureStyleInformation bigPictureStyleInformation =
-            BigPictureStyleInformation(
-                ByteArrayAndroidBitmap.fromBase64String(image),
-                largeIcon: ByteArrayAndroidBitmap.fromBase64String(image),
-                contentTitle: notification.title,
-                htmlFormatContentTitle: true,
-                summaryText: notification.body,
-                htmlFormatSummaryText: true);
+        // final BigPictureStyleInformation bigPictureStyleInformation =
+        //     BigPictureStyleInformation(
+        //         ByteArrayAndroidBitmap.fromBase64String(image),
+        //         largeIcon: ByteArrayAndroidBitmap.fromBase64String(image),
+        //         contentTitle: notification.title,
+        //         htmlFormatContentTitle: true,
+        //         summaryText: notification.body,
+        //         htmlFormatSummaryText: true);
         image != ''
             ? flutterLocalNotificationsPlugin.show(
                 notification.hashCode,
@@ -114,14 +123,39 @@ class StaycationState extends State<Staycation> {
   }
 
   @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Color(0xFF3252DF)));
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Staycation',
-      initialRoute: result != null ? "/home" : "/",
-      routes: Navigate.routes,
+      initialRoute:
+          FirebaseAuth.instance.currentUser == null ? 'login' : 'home',
+      onGenerateRoute: (settings) {
+        switch (settings.name) {
+          case 'home':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => HomePage(),
+            );
+          case 'login':
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => OnboardingScreen(),
+            );
+          default:
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (_) => OnboardingScreen(),
+            );
+        }
+      },
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Poppins',
