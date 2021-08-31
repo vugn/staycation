@@ -8,10 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:staycation/pages/home.dart';
-import 'package:staycation/pages/onboarding.dart';
 import 'package:staycation/utils/CustomScroll.dart';
 import 'package:http/http.dart' as http;
+import 'package:staycation/utils/url.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -67,10 +66,10 @@ class StaycationState extends State<Staycation> {
   @override
   void initState() {
     super.initState();
-
+    FirebaseMessaging.instance.getToken().then((value) => print(value));
     _sub = FirebaseAuth.instance.userChanges().listen((event) {
       _navigatorKey.currentState!.pushReplacementNamed(
-        event != null ? 'home' : 'login',
+        event != null ? '/home' : '/sign-in',
       );
     });
 
@@ -86,14 +85,14 @@ class StaycationState extends State<Staycation> {
       AndroidNotification? android = message.notification!.android;
       if (notification != null && android != null) {
         final String image = await _base64encodedImage(android.imageUrl ?? '');
-        // final BigPictureStyleInformation bigPictureStyleInformation =
-        //     BigPictureStyleInformation(
-        //         ByteArrayAndroidBitmap.fromBase64String(image),
-        //         largeIcon: ByteArrayAndroidBitmap.fromBase64String(image),
-        //         contentTitle: notification.title,
-        //         htmlFormatContentTitle: true,
-        //         summaryText: notification.body,
-        //         htmlFormatSummaryText: true);
+        final BigPictureStyleInformation bigPictureStyleInformation =
+            BigPictureStyleInformation(
+                ByteArrayAndroidBitmap.fromBase64String(image),
+                largeIcon: ByteArrayAndroidBitmap.fromBase64String(image),
+                contentTitle: notification.title,
+                htmlFormatContentTitle: true,
+                summaryText: notification.body,
+                htmlFormatSummaryText: true);
         image != ''
             ? flutterLocalNotificationsPlugin.show(
                 notification.hashCode,
@@ -101,12 +100,11 @@ class StaycationState extends State<Staycation> {
                 notification.body,
                 NotificationDetails(
                     android: AndroidNotificationDetails(
-                  channel.id,
-                  channel.name,
-                  channel.description,
-                  icon: android.smallIcon,
-                  largeIcon: ByteArrayAndroidBitmap.fromBase64String(image),
-                )))
+                        channel.id, channel.name, channel.description,
+                        icon: android.smallIcon,
+                        largeIcon:
+                            ByteArrayAndroidBitmap.fromBase64String(image),
+                        styleInformation: bigPictureStyleInformation)))
             : flutterLocalNotificationsPlugin.show(
                 notification.hashCode,
                 notification.title,
@@ -135,27 +133,8 @@ class StaycationState extends State<Staycation> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Staycation',
-      initialRoute:
-          FirebaseAuth.instance.currentUser == null ? 'login' : 'home',
-      onGenerateRoute: (settings) {
-        switch (settings.name) {
-          case 'home':
-            return MaterialPageRoute(
-              settings: settings,
-              builder: (_) => HomePage(),
-            );
-          case 'login':
-            return MaterialPageRoute(
-              settings: settings,
-              builder: (_) => OnboardingScreen(),
-            );
-          default:
-            return MaterialPageRoute(
-              settings: settings,
-              builder: (_) => OnboardingScreen(),
-            );
-        }
-      },
+      initialRoute: FirebaseAuth.instance.currentUser == null ? '/' : '/home',
+      routes: Navigate.routes,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         fontFamily: 'Poppins',
